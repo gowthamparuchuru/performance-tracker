@@ -3,7 +3,6 @@ from datetime import datetime
 
 # Extrenal packages
 import pandas as pd
-import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import numpy as np
 
@@ -29,10 +28,8 @@ def today_stats(json_obj):
 
     # print the dataframe.
     st.header(f"Date: {date}")
-    st.table(df.style.format(
-        {'Capital': '{:.0f}', 'Lot': '{:.0f}', 'Brokerage': '{:.0f}',
-            'ROI': '{:.2%}', 'PNL': '{:.2f}'}
-    ))
+    st.table(df.style.format({'Capital': '{:.0f}', 'Lot': '{:.0f}',
+             'Brokerage': '{:.0f}', 'ROI': '{:.2%}', 'PNL': '{:.2f}'}))
 
     # plot PnL chart.
     st.header(f"Today profit and loss")
