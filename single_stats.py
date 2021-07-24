@@ -1,3 +1,4 @@
+from PIL.Image import alpha_composite
 import streamlit as st
 from datetime import datetime
 
@@ -5,6 +6,8 @@ from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
 import calplot
+import plotly.graph_objects as go
+import numpy as np
 
 
 def single_stats(selected_strat, df):
@@ -34,39 +37,46 @@ def single_stats(selected_strat, df):
 
     # calculate all statistics of model.
     stats = {}
-    # stats["Start Date"] = datetime.strftime(df.index[0], "%d-%b-%Y")
+    stats["Start Date"] = datetime.strftime(df.index[0], "%d-%b-%Y")
     stats["Total Days"] = len(df)
     stats["Winning Day"] = df[df['PNL'] >= 0]['PNL'].count()
     stats["Losing Day"] = df[df['PNL'] < 0]['PNL'].count()
-    stats["Winning Accuracy %"] = round(
-        (stats["Winning Day"]/stats["Total Days"])*100, 2)
+    stats["Winning Accuracy %"] = f"{round((stats['Winning Day']/stats['Total Days'])*100, 2)} %"
     stats["Max Profit"] = df["PNL"].max()
     stats["Max Loss"] = df["PNL"].min()
     stats["Max Drawdown"] = df["Drawdown"].min()
-    stats["Avg Profit on Win Days"] = df[df['PNL'] >= 0]['PNL'].mean()
-    stats["Avg Loss on Loss Days"] = df[df['PNL'] < 0]['PNL'].mean()
-    stats["Avg Profit Per day"] = df['PNL'].mean()
+    stats["Avg Profit on Win Days"] = round(
+        df[df['PNL'] >= 0]['PNL'].mean(), 2)
+    stats["Avg Loss on Loss Days"] = round(df[df['PNL'] < 0]['PNL'].mean(), 2)
+    stats["Avg Profit Per day"] = round(df['PNL'].mean(), 2)
     stats["Net profit"] = df['PNL'].sum()
-    stats["Net Returns %"] = df['ROI'].sum()
+    stats["Net Returns %"] = f"{df['ROI'].sum()} %"
 
     stat_table = pd.DataFrame(stats.items(), columns=["Stat", "Value"])
-    stat_table['Value'] = round(stat_table['Value'], 2)
+    stat_table['Value'] = stat_table['Value'].astype(str)
     stat_table.set_index("Stat", inplace=True)
+
     st.header(f"{selected_strat} statistics")
     st.table(stat_table)
 
     # Day profit and losses
     st.header(f"Day wise profit and loss")
-    plt.figure(figsize=(15, 5))
-    plt.bar(df.index, df["PNL"], color=(
-        df["PNL"] > 0).map({True: 'g', False: 'r'}))
-    plt.title("Day wise Profit and Loss")
-    plt.xlabel("Date")
-    plt.ylabel("Profit and Loss")
-    plt.grid('on', linestyle='--')
-    st.pyplot()
-    plt.clf()
+    colours = np.where(df["PNL"] < 0, 'crimson', 'SeaGreen')
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=df.index, y=df["PNL"], marker_color=colours))
+    fig.update_layout(
+        title="Day wise Profit and Loss",
+        xaxis_title="Date",
+        yaxis_title="P&L(₹)",
+        font=dict(
+            family="Courier New, monospace",
+            size=14,
+        ),
+        height=500
+    )
+    st.plotly_chart(fig)
 
+    # calendar heatmap
     st.header(f"Calendar Heatmap")
     max_point = max(abs(min(df['PNL'])), max(df['PNL']))
     calplot.calplot(df["PNL"], cmap='PRGn', colorbar=True, linewidth=3, figsize=(
@@ -76,39 +86,63 @@ def single_stats(selected_strat, df):
 
     # plot percentage returns
     st.header(f"Percentage returns plot")
-    plt.figure(figsize=(15, 5))
-    plt.plot(df['CumROI'], '.', alpha=0.8)
-    plt.fill_between(df.index, df['CumROI'], color='#0081a7', alpha=0.20)
-    plt.title("Percentage Returns")
-    plt.xlabel("Date")
-    plt.ylabel("ROI")
-    plt.grid('on', linestyle='--')
-    st.pyplot()
-    plt.clf()
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df.index, y=df['CumROI'],
+                  mode='lines+markers',
+                  marker_color='rgba(46, 139, 87, 1)', opacity=0.5,
+                  fill='tozeroy', fillcolor='rgba(46, 139, 87, 0.2)'))
+    fig.update_layout(
+        title="Percentage returns plot",
+        xaxis_title="Date",
+        yaxis_title="ROI(%)",
+        font=dict(
+            family="Courier New, monospace",
+            size=14,
+        ),
+        height=400
+    )
+    st.plotly_chart(fig)
 
     # plot absolute returns
     st.header(f"Absolute returns plot")
-    plt.figure(figsize=(15, 5))
-    plt.plot(df['CumPNL'], alpha=0.8)
-    plt.fill_between(df.index, df['CumPNL'], color='#0081a7', alpha=0.20)
-    plt.title("Absolute Returns")
-    plt.xlabel("Date")
-    plt.ylabel("Return")
-    plt.grid('on', linestyle='--')
-    st.pyplot()
-    plt.clf()
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df.index, y=df['CumPNL'],
+                  mode='lines',
+                  marker_color='rgba(0,129,167,1)', opacity=0.5,
+                  fill='tozeroy', fillcolor='rgba(0,129,167,0.2)'))
+    fig.update_layout(
+        title="Absolute returns plot",
+        xaxis_title="Date",
+        yaxis_title="Return(₹)",
+        font=dict(
+            family="Courier New, monospace",
+            size=14,
+        ),
+        height=400
+    )
+    st.plotly_chart(fig)
 
     # plot Drawdown
     st.header(f"Draw down plot")
-    plt.figure(figsize=(15, 5))
-    plt.plot(df['Drawdown'], 'k--', alpha=0.5)
-    plt.fill_between(df.index, df['Drawdown'], color='#e56b6f', alpha=0.30)
-    plt.title("Drawdown")
-    plt.xlabel("Date")
-    plt.ylabel("DD")
-    plt.grid('on', linestyle='--')
-    st.pyplot()
-    plt.clf()
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df.index, y=df['Drawdown'],
+                  mode='lines+markers',
+                  marker_color='rgba(229,107,111,1)', opacity=0.5,
+                  fill='tozeroy', fillcolor='rgba(229,107,111,0.2)'))
+    fig.update_layout(
+        title="Draw down plot",
+        xaxis_title="Date",
+        yaxis_title="Drawdown(₹)",
+        font=dict(
+            family="Courier New, monospace",
+            size=14,
+        ),
+        height=400,
+        margin=dict(
+            pad=10
+        ),
+    )
+    st.plotly_chart(fig)
 
     st.header(f"Monthly PNL")
     st.table(month_groups)

@@ -19,9 +19,10 @@ pswd = st.sidebar.text_input("Enter Password:", key="password")
 st.sidebar.button("Enter")
 
 st.title("**PERFORMANCE TRACKER🤫**")
-
-if hashlib.sha256(pswd.encode()).hexdigest() != st.secrets["PSWD"]:
-    st.error('Enter correct password!')
+if pswd == "":
+    st.info('Enter password!👋')
+elif hashlib.sha256(pswd.encode()).hexdigest() != st.secrets["PSWD"]:
+    st.error('Enter correct password!✋')
 else:
 
     # should add corner cases.
@@ -35,13 +36,12 @@ else:
     fetched_data = json.loads(message)
 
     # select box
-    strategies = []
+    strategies = ['Today', "All"]
     strategies += list(fetched_data.keys())
-    strategies += ['Today', "All"]
 
     selected_strat = st.sidebar.selectbox(
         'Select strategy',
-        strategies
+        strategies, 0
     )
 
     # brokerage radio button
