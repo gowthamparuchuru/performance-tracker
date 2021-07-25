@@ -4,7 +4,6 @@ from datetime import datetime
 
 # Extrenal packages
 import pandas as pd
-import matplotlib.pyplot as plt
 import calplot
 import plotly.graph_objects as go
 import numpy as np
@@ -22,8 +21,17 @@ def single_stats(selected_strat, df):
     # cumulative roi
     df['CumROI'] = df['ROI'].cumsum()
 
-    # monthly pnl
+    # weekday wise pnl
     df['tmp'] = df.index
+    weekDays = ("Monday", "Tuesday", "Wednesday",
+                "Thursday", "Friday", "Saturday", "Sunday")
+    df['Week'] = df['tmp'].apply(
+        lambda x: weekDays[x.to_pydatetime().weekday()])
+    week_groups = pd.DataFrame()
+    week_groups["PNL"] = df.groupby('Week', sort=False)['PNL'].sum()
+    week_groups["ROI"] = df.groupby('Week', sort=False)['ROI'].sum()
+
+    # monthly pnl
     df['Month'] = df['tmp'].apply(lambda x: x.strftime("%b, %Y"))
     month_groups = pd.DataFrame()
     month_groups["PNL"] = df.groupby('Month', sort=False)['PNL'].sum()
@@ -77,15 +85,15 @@ def single_stats(selected_strat, df):
     st.plotly_chart(fig)
 
     # calendar heatmap
-    st.header(f"Calendar Heatmap")
-    max_point = max(abs(min(df['PNL'])), max(df['PNL']))
-    calplot.calplot(df["PNL"], cmap='PRGn', colorbar=True, linewidth=3, figsize=(
-        60, 6), edgecolor='grey', vmin=-max_point, vmax=max_point)
-    st.pyplot()
-    plt.clf()
+    # st.header(f"Calendar Heatmap")
+    # max_point = max(abs(min(df['PNL'])), max(df['PNL']))
+    # calplot.calplot(df["PNL"], cmap='PRGn', colorbar=True, linewidth=3, figsize=(
+    #     60, 6), edgecolor='grey', vmin=-max_point, vmax=max_point)
+    # st.pyplot()
+    # plt.clf()
 
     # plot percentage returns
-    st.header(f"Percentage returns plot")
+    st.header(f"Returns plots")
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df.index, y=df['CumROI'],
                   mode='lines+markers',
@@ -104,7 +112,6 @@ def single_stats(selected_strat, df):
     st.plotly_chart(fig)
 
     # plot absolute returns
-    st.header(f"Absolute returns plot")
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df.index, y=df['CumPNL'],
                   mode='lines',
@@ -123,7 +130,7 @@ def single_stats(selected_strat, df):
     st.plotly_chart(fig)
 
     # plot Drawdown
-    st.header(f"Draw down plot")
+    st.header(f"Drawdown plot")
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df.index, y=df['Drawdown'],
                   mode='lines+markers',
@@ -141,6 +148,43 @@ def single_stats(selected_strat, df):
         margin=dict(
             pad=10
         ),
+    )
+    st.plotly_chart(fig)
+
+    st.header(f"Weekday wise PNL")
+    # st.table(week_groups.style.format({
+    #     "PNL": '{:.0f}',
+    #     "ROI": '{:.2f}'
+    # }))
+    colours = np.where(week_groups["PNL"] < 0, 'crimson', 'SeaGreen')
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=week_groups.index,
+                  y=week_groups["PNL"], marker_color=colours))
+    fig.update_layout(
+        title="Week Day wise Profit and Loss",
+        xaxis_title="Day",
+        yaxis_title="P&L(₹)",
+        font=dict(
+            family="Courier New, monospace",
+            size=14,
+        ),
+        height=500
+    )
+    st.plotly_chart(fig)
+
+    colours = np.where(week_groups["ROI"] < 0, 'crimson', 'SeaGreen')
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=week_groups.index,
+                  y=week_groups["ROI"], marker_color=colours))
+    fig.update_layout(
+        title="Week Day wise ROI",
+        xaxis_title="Day",
+        yaxis_title="ROI(%)",
+        font=dict(
+            family="Courier New, monospace",
+            size=14,
+        ),
+        height=500
     )
     st.plotly_chart(fig)
 

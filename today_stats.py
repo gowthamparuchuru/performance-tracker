@@ -32,7 +32,7 @@ def today_stats(json_obj):
              'Brokerage': '{:.0f}', 'ROI': '{:.2%}', 'PNL': '{:.2f}'}))
 
     # plot PnL chart.
-    st.header(f"Today profit and loss")
+    st.header(f"Today stats")
     colours = np.where(df["PNL"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
     fig.add_trace(go.Bar(x=df.index, y=df["PNL"], marker_color=colours))
@@ -48,7 +48,6 @@ def today_stats(json_obj):
     st.plotly_chart(fig)
 
     # plot ROI chart for the day.
-    st.header(f"Today ROI")
     colours = np.where(df["ROI"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
     fig.add_trace(go.Bar(x=df.index, y=round(

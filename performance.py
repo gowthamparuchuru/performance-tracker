@@ -36,7 +36,7 @@ else:
     fetched_data = json.loads(message)
 
     # select box
-    strategies = ['Today', "All"]
+    strategies = ['Today', "Portfolio"]
     strategies += list(fetched_data.keys())
 
     selected_strat = st.sidebar.selectbox(
@@ -57,13 +57,11 @@ else:
         for v in json_obj.values():
             v["PNL"] = v["PNL"] - v["Brokerage"]
 
+    # render page based on selected option.
     if selected_strat == "Today":
         today_stats(json_obj)
-
-    elif selected_strat == "All":
-        for i in json_obj.keys():
-            df = json_obj[i]
-            st.table(df)
+    elif selected_strat == "Portfolio":
+        all_stats(json_obj)
     else:
         df = json_obj[selected_strat]
         single_stats(selected_strat, df)
