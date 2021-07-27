@@ -23,16 +23,21 @@ def today_stats(json_obj):
     df = pd.concat(stats, axis=1)
     df = df.T
 
+    # caluclate net and roi.
     df.loc["Net"] = df.sum()
-    df["ROI"] = df["PNL"]/df["Capital"]
+    df["ROI"] = round(100 * df["PNL"]/df["Capital"], 2)
 
     # print the dataframe.
     st.header(f"Date: {date}")
-    st.table(df.style.format({'Capital': '{:.0f}', 'Lot': '{:.0f}',
-             'Brokerage': '{:.0f}', 'ROI': '{:.2%}', 'PNL': '{:.2f}'}))
+    st.table(df.style.format({'Capital': '₹ {:20,.0f}',
+                              'Lot': '{:.0f}',
+                              'Brokerage': '₹ {:20,.0f}',
+                              'ROI': '{:.2f} %',
+                              'PNL': '₹ {:20,.2f}'}))
 
     # plot PnL chart.
     st.header(f"Today stats")
+
     colours = np.where(df["PNL"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
     fig.add_trace(go.Bar(x=df.index, y=df["PNL"], marker_color=colours))
@@ -50,8 +55,7 @@ def today_stats(json_obj):
     # plot ROI chart for the day.
     colours = np.where(df["ROI"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=df.index, y=round(
-        df["ROI"]*100, 2), marker_color=colours))
+    fig.add_trace(go.Bar(x=df.index, y=df["ROI"], marker_color=colours))
     fig.update_layout(
         title="Today ROI",
         xaxis_title="Strategy",

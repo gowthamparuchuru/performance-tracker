@@ -10,7 +10,9 @@ import numpy as np
 
 
 def single_stats(selected_strat, df):
+    # save a copy of dataframe.
     original = df.copy()
+
     # cumulative pnl
     df['CumPNL'] = df['PNL'].cumsum()
     # drawdown
@@ -191,11 +193,6 @@ def single_stats(selected_strat, df):
     st.plotly_chart(fig)
 
     st.header(f"Weekday wise PNL")
-    # st.table(week_groups.style.format({
-    #     "PNL": '{:.0f}',
-    #     "ROI": '{:.2f}'
-    # }))
-
     cats = ['Monday', 'Tuesday', 'Wednesday',
             'Thursday', 'Friday']
     week_groups = week_groups.loc[cats]
