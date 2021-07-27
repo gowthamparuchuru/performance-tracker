@@ -18,7 +18,7 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 pswd = st.sidebar.text_input("Enter Password:", key="password")
 st.sidebar.button("Enter")
 
-st.title("**PERFORMANCE TRACKER🤫**")
+st.title("**📊PERFORMANCE TRACKER🤫**")
 if pswd == "":
     st.info('Enter password!👋')
 elif hashlib.sha256(pswd.encode()).hexdigest() != st.secrets["PSWD"]:
