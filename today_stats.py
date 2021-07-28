@@ -1,16 +1,18 @@
+import numpy as np
+import plotly.graph_objects as go
+import pandas as pd
 import streamlit as st
 from datetime import timedelta, date, datetime
+import pytz
+IST = pytz.timezone('Asia/Kolkata')
 
 # Extrenal packages
-import pandas as pd
-import plotly.graph_objects as go
-import numpy as np
 
 
 def today_stats(json_obj):
 
     # Date selector
-    now = datetime.now()
+    now = datetime.now(IST)
     today330pm = now.replace(hour=15, minute=30, second=0, microsecond=0)
 
     min_date = datetime(2021, 6, 7)
