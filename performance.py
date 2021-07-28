@@ -32,6 +32,7 @@ else:
     socket.connect(f"tcp://{st.secrets['IP']}:{st.secrets['PORT']}")
     socket.send(pswd.encode())
     message = socket.recv()
+    socket.close()
 
     # load data.
     fetched_data = json.loads(message)
