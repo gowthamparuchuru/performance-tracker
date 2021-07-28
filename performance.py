@@ -15,7 +15,8 @@ import zmq
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
-pswd = st.sidebar.text_input("Enter Password:", key="password")
+# pas
+pswd = st.sidebar.text_input("Enter Password:", type="password")
 st.sidebar.button("Enter")
 
 st.title("**📊PERFORMANCE TRACKER🤫**")
@@ -49,15 +50,33 @@ else:
         'Brokerage',
         ("Yes", "No"))
 
+    # select analysis type.
+    analysis_type = st.sidebar.selectbox(
+        'Analysis',
+        ("Absolute", "Per lot"), 0
+    )
+
+    # create pandas dataframes
     json_obj = {}
     for k, v in fetched_data.items():
         json_obj[k] = pd.read_json(v)
 
+    # process based on analysis.
+    if analysis_type == "Absolute":
+        pass
+    elif analysis_type == "Per lot":
+        for v in json_obj.values():
+            v["Capital"] = round(v["Capital"]/v["Lot"], 2)
+            v["Brokerage"] = round(v["Brokerage"]/v["Lot"], 2)
+            v["PNL"] = round(v["PNL"]/v["Lot"], 2)
+            v["Lot"] = 1
+
+    # process based on brokerage.
     if chosen == "Yes":
         for v in json_obj.values():
             v["PNL"] = v["PNL"] - v["Brokerage"]
 
-    # render page based on selected option.
+    # render page based by selected option.
     if selected_strat == "Today":
         today_stats(json_obj)
     elif selected_strat == "Portfolio":

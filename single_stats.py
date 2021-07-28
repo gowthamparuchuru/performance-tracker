@@ -52,15 +52,17 @@ def single_stats(selected_strat, df):
     stats["Winning Day"] = df[df['PNL'] >= 0]['PNL'].count()
     stats["Losing Day"] = df[df['PNL'] < 0]['PNL'].count()
     stats["Winning Accuracy %"] = f"{round((stats['Winning Day']/stats['Total Days'])*100, 2)} %"
-    stats["Max Profit"] = df["PNL"].max()
-    stats["Max Loss"] = df["PNL"].min()
-    stats["Max Drawdown"] = df["Drawdown"].min()
+    stats["Max Profit"] = "{:.2f}".format(df["PNL"].max())
+    stats["Max Loss"] = "{:.2f}".format(df["PNL"].min())
+    stats["Max Drawdown"] = "{:.2f}".format(df["Drawdown"].min())
     stats["Avg Profit on Win Days"] = round(
         df[df['PNL'] >= 0]['PNL'].mean(), 2)
     stats["Avg Loss on Loss Days"] = round(df[df['PNL'] < 0]['PNL'].mean(), 2)
     stats["Avg Profit Per day"] = round(df['PNL'].mean(), 2)
     stats["Net profit"] = df['PNL'].sum()
     stats["Net Returns %"] = f"{round(df['ROI'].sum(), 2)} %"
+    stats["Sharpe Ratio"] = "{:.2f}".format(
+        (252 ** 0.5) * (df["PNL"].mean() / df["PNL"].std()))
 
     stat_table = pd.DataFrame(stats.items(), columns=["Stat", "Value"])
     stat_table['Value'] = stat_table['Value'].astype(str)
@@ -78,6 +80,22 @@ def single_stats(selected_strat, df):
         title="Day wise Profit and Loss",
         xaxis_title="Date",
         yaxis_title="P&L(₹)",
+        font=dict(
+            family="Courier New, monospace",
+            size=14,
+        ),
+        height=500
+    )
+    st.plotly_chart(fig)
+
+    # Day wise ROI
+    colours = np.where(df["ROI"] < 0, 'crimson', 'SeaGreen')
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=df.index, y=df["ROI"], marker_color=colours))
+    fig.update_layout(
+        title="Day wise ROI",
+        xaxis_title="Date",
+        yaxis_title="ROI(%)",
         font=dict(
             family="Courier New, monospace",
             size=14,
@@ -230,15 +248,15 @@ def single_stats(selected_strat, df):
     st.plotly_chart(fig)
 
     st.header(f"Monthly PNL")
-    st.table(month_groups.style.format({
+    st.table(month_groups.iloc[::-1].style.format({
         "PNL": '₹ {:20,.0f}',
-        "ROI": '{:.2f}%'
+        "ROI": '{:.2f} %'
     }))
 
     st.header(f"Yearly PNL")
-    st.table(year_groups.style.format({
+    st.table(year_groups.iloc[::-1].style.format({
         "PNL": '₹ {:20,.0f}',
-        "ROI": '{:.2f}%'
+        "ROI": '{:.2f} %'
     }))
 
     st.header(f"Date-wise PNL (Last 30 Days)")
@@ -248,7 +266,8 @@ def single_stats(selected_strat, df):
     original.drop(["Brokerage"], axis=1, inplace=True)
     original['ROI'] = (original['PNL']/original['Capital']) * 100
     st.table(original.iloc[::-1].head(30).style.format({
-        "Capital": '₹ {:20,.0f}',
-        "PNL": '₹ {:.2f}',
-        "ROI": '{:.2f}%',
+        "Capital": '{:20,.0f}',
+        "Lot": '{:.0f}',
+        "PNL": "{:.0f}",
+        "ROI": '{:.2f} %',
     }))

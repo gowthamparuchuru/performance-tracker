@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import datetime
+from datetime import timedelta, date, datetime
 
 # Extrenal packages
 import pandas as pd
@@ -9,15 +9,31 @@ import numpy as np
 
 def today_stats(json_obj):
 
+    # Date selector
+    now = datetime.now()
+    today330pm = now.replace(hour=15, minute=30, second=0, microsecond=0)
+
+    min_date = datetime(2021, 6, 7)
+    max_date = date.today()
+
+    if now.weekday() == 5:  # saturday
+        value_date = date.today() - timedelta(days=1)
+    elif now.weekday() == 6:  # sunday
+        value_date = date.today() - timedelta(days=2)
+    elif now < today330pm:
+        value_date = date.today() - timedelta(days=1)
+    else:
+        value_date = date.today()
+
+    select_date = st.sidebar.date_input(
+        "select a date", value=value_date, min_value=min_date, max_value=max_date)
+
     # process the json_obj and combine curr day stats.
     stats = {}
     for strat in json_obj.keys():
-        row = json_obj[strat].iloc[-1]
-        date = json_obj[strat].index[-1]
+        row = json_obj[strat].loc[datetime.strftime(
+            select_date, "%d-%m-%Y")]
         stats[strat] = row
-
-    # create date to print
-    date = datetime.strftime(date, "%d-%b-%Y")
 
     # combine all rows.
     df = pd.concat(stats, axis=1)
@@ -28,7 +44,7 @@ def today_stats(json_obj):
     df["ROI"] = round(100 * df["PNL"]/df["Capital"], 2)
 
     # print the dataframe.
-    st.header(f"Date: {date}")
+    st.header(f"Date: {datetime.strftime(select_date, '%d-%b-%Y (%a)')}")
     st.table(df.style.format({'Capital': '₹ {:20,.0f}',
                               'Lot': '{:.0f}',
                               'Brokerage': '₹ {:20,.0f}',
@@ -36,13 +52,13 @@ def today_stats(json_obj):
                               'PNL': '₹ {:20,.2f}'}))
 
     # plot PnL chart.
-    st.header(f"Today stats")
+    st.header(f"PNL stats")
 
     colours = np.where(df["PNL"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
     fig.add_trace(go.Bar(x=df.index, y=df["PNL"], marker_color=colours))
     fig.update_layout(
-        title="Today profit and loss",
+        title="Profit and loss plot",
         xaxis_title="Strategy",
         yaxis_title="P&L(₹)",
         font=dict(
@@ -57,7 +73,7 @@ def today_stats(json_obj):
     fig = go.Figure()
     fig.add_trace(go.Bar(x=df.index, y=df["ROI"], marker_color=colours))
     fig.update_layout(
-        title="Today ROI",
+        title="ROI plot",
         xaxis_title="Strategy",
         yaxis_title="ROI(%)",
         font=dict(

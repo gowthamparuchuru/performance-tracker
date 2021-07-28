@@ -4,3 +4,4 @@ calplot
 zmq
 numpy
 plotly
+seaborn
