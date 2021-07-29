@@ -1,2 +1,8 @@
+# compiler cache
 __pycache__
+
+# secrets file
 .streamlit/secrets.toml
+
+# vs code work space
+workspace*

@@ -33,12 +33,21 @@ def today_stats(json_obj):
     # process the json_obj and combine curr day stats.
     stats = {}
     for strat in json_obj.keys():
-        row = json_obj[strat].loc[datetime.strftime(
-            select_date, "%d-%m-%Y")]
-        stats[strat] = row
+        try:
+            row = json_obj[strat].loc[datetime.strftime(
+                select_date, "%d-%b-%Y")]
+            stats[strat] = row
+        except Exception:
+            pass
+
+    if len(stats) == 0:
+        st.header(
+            f"No Data for {datetime.strftime(select_date, '%d-%b-%Y (%a)')}")
+        return
 
     # combine all rows.
     df = pd.concat(stats, axis=1)
+    # st.table(df)
     df = df.T
 
     # caluclate net and roi.

@@ -22,6 +22,9 @@ def single_stats(selected_strat, df):
     df['ROI'] = round((df['PNL']/df['Capital'])*100, 2)
     # cumulative roi
     df['CumROI'] = df['ROI'].cumsum()
+    # drawdown roi
+    df['RoiHighValue'] = df['CumROI'].cummax()
+    df['RoiDrawdown'] = df['CumROI'] - df['RoiHighValue']
 
     # weekday wise pnl
     df['tmp'] = df.index
@@ -187,6 +190,39 @@ def single_stats(selected_strat, df):
         title="Draw down plot",
         xaxis_title="Date",
         yaxis_title="Drawdown(₹)",
+        font=dict(
+            family="Courier New, monospace",
+            size=14,
+        ),
+        height=600,
+        margin=dict(
+            pad=3
+        ),
+    )
+    fig.update_xaxes(
+        rangeslider_visible=True,
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="YTD", step="year", stepmode="todate"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(step="all")
+            ])
+        )
+    )
+    st.plotly_chart(fig)
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df.index, y=df['RoiDrawdown'],
+                  mode='lines+markers',
+                  marker=dict(size=4),
+                  marker_color='rgba(229,107,111,1)', opacity=0.5,
+                  fill='tozeroy', fillcolor='rgba(229,107,111,0.2)'))
+    fig.update_layout(
+        title="Draw down plot in ROI",
+        xaxis_title="Date",
+        yaxis_title="Drawdown(%)",
         font=dict(
             family="Courier New, monospace",
             size=14,
