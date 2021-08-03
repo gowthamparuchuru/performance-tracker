@@ -63,13 +63,13 @@ def today_stats(json_obj):
                               'PNL': '₹ {:20,.2f}'}))
 
     # plot PnL chart.
-    st.header(f"PNL stats")
+    st.header(f"PNL plots")
 
     colours = np.where(df["PNL"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
     fig.add_trace(go.Bar(x=df.index, y=df["PNL"], marker_color=colours))
     fig.update_layout(
-        title="Profit and loss plot",
+        title="Profit and Loss plot",
         xaxis_title="Strategy",
         yaxis_title="P&L(₹)",
         font=dict(

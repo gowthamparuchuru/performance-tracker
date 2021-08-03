@@ -25,7 +25,6 @@ if pswd == "":
 elif hashlib.sha256(pswd.encode()).hexdigest() != st.secrets["PSWD"]:
     st.error('Enter correct password!✋')
 else:
-
     # should add corner cases.
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
@@ -52,10 +51,9 @@ else:
         ("Yes", "No"))
 
     # select analysis type.
-    analysis_type = st.sidebar.selectbox(
+    analysis_type = st.sidebar.radio(
         'Analysis',
-        ("Absolute", "Per lot"), 0
-    )
+        ("Absolute", "Per lot"))
 
     # create pandas dataframes
     json_obj = {}

@@ -62,10 +62,16 @@ def single_stats(selected_strat, df):
         df[df['PNL'] >= 0]['PNL'].mean(), 2)
     stats["Avg Loss on Loss Days"] = round(df[df['PNL'] < 0]['PNL'].mean(), 2)
     stats["Avg Profit Per day"] = round(df['PNL'].mean(), 2)
-    stats["Net profit"] = df['PNL'].sum()
+    stats["Net profit"] = "{:.2f}".format(df['PNL'].sum())
     stats["Net Returns %"] = f"{round(df['ROI'].sum(), 2)} %"
     stats["Sharpe Ratio"] = "{:.2f}".format(
         (252 ** 0.5) * (df["PNL"].mean() / df["PNL"].std()))
+    win_days_acc = (stats['Winning Day']/stats['Total Days'])*100
+    loss_days_acc = 100 - win_days_acc
+    risk_to_reward = stats["Avg Profit on Win Days"] / \
+        (- stats["Avg Loss on Loss Days"])
+    stats["Expectancy"] = "{:.2f}".format(
+        ((risk_to_reward * win_days_acc) - loss_days_acc)/100)
 
     stat_table = pd.DataFrame(stats.items(), columns=["Stat", "Value"])
     stat_table['Value'] = stat_table['Value'].astype(str)
