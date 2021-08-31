@@ -15,6 +15,8 @@ import zmq
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
+st.set_page_config(page_title="Performance Tracker", page_icon="🎯")
+
 # pas
 pswd = st.sidebar.text_input("Enter Password:", type="password")
 st.sidebar.button("Enter")

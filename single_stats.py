@@ -80,15 +80,18 @@ def single_stats(selected_strat, df):
     st.header(f"{selected_strat} statistics")
     st.table(stat_table)
 
-    # Day profit and losses
-    st.header(f"Day wise profit and loss")
-    colours = np.where(df["PNL"] < 0, 'crimson', 'SeaGreen')
+    ####################
+    ### Day wise PNL ###
+    ####################
+    st.header(f"Daily profit and loss")
+    # ROI
+    colours = np.where(df["ROI"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=df.index, y=df["PNL"], marker_color=colours))
+    fig.add_trace(go.Bar(x=df.index, y=df["ROI"], marker_color=colours))
     fig.update_layout(
-        title="Day wise Profit and Loss",
+        title="Day wise ROI",
         xaxis_title="Date",
-        yaxis_title="P&L(₹)",
+        yaxis_title="ROI(%)",
         font=dict(
             family="Courier New, monospace",
             size=14,
@@ -97,14 +100,15 @@ def single_stats(selected_strat, df):
     )
     st.plotly_chart(fig)
 
-    # Day wise ROI
-    colours = np.where(df["ROI"] < 0, 'crimson', 'SeaGreen')
+    # Absolute
+
+    colours = np.where(df["PNL"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=df.index, y=df["ROI"], marker_color=colours))
+    fig.add_trace(go.Bar(x=df.index, y=df["PNL"], marker_color=colours))
     fig.update_layout(
-        title="Day wise ROI",
+        title="Day wise PNL",
         xaxis_title="Date",
-        yaxis_title="ROI(%)",
+        yaxis_title="P&L(₹)",
         font=dict(
             family="Courier New, monospace",
             size=14,
@@ -121,7 +125,10 @@ def single_stats(selected_strat, df):
     # st.pyplot()
     # plt.clf()
 
-    # plot percentage returns
+    ###################
+    ### Equity Plot ###
+    ###################
+    # Percentage
     st.header(f"Returns plots")
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df.index, y=df['CumROI'],
@@ -153,7 +160,7 @@ def single_stats(selected_strat, df):
     )
     st.plotly_chart(fig)
 
-    # plot absolute returns
+    # Absolute
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df.index, y=df['CumPNL'],
                   mode='lines+markers',
@@ -184,7 +191,44 @@ def single_stats(selected_strat, df):
     )
     st.plotly_chart(fig)
 
-    # plot Drawdown
+    ###################
+    ###  Draw Down  ###
+    ###################
+    # Percentage Drawdown
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df.index, y=df['RoiDrawdown'],
+                  mode='lines+markers',
+                  marker=dict(size=4),
+                  marker_color='rgba(229,107,111,1)', opacity=0.5,
+                  fill='tozeroy', fillcolor='rgba(229,107,111,0.2)'))
+    fig.update_layout(
+        title="Draw down plot in ROI",
+        xaxis_title="Date",
+        yaxis_title="Drawdown(%)",
+        font=dict(
+            family="Courier New, monospace",
+            size=14,
+        ),
+        height=600,
+        margin=dict(
+            pad=3
+        ),
+    )
+    fig.update_xaxes(
+        rangeslider_visible=True,
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="YTD", step="year", stepmode="todate"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(step="all")
+            ])
+        )
+    )
+    st.plotly_chart(fig)
+
+    # Absolute Drawdown
     st.header(f"Drawdown plot")
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df.index, y=df['Drawdown'],
@@ -219,38 +263,9 @@ def single_stats(selected_strat, df):
     )
     st.plotly_chart(fig)
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df.index, y=df['RoiDrawdown'],
-                  mode='lines+markers',
-                  marker=dict(size=4),
-                  marker_color='rgba(229,107,111,1)', opacity=0.5,
-                  fill='tozeroy', fillcolor='rgba(229,107,111,0.2)'))
-    fig.update_layout(
-        title="Draw down plot in ROI",
-        xaxis_title="Date",
-        yaxis_title="Drawdown(%)",
-        font=dict(
-            family="Courier New, monospace",
-            size=14,
-        ),
-        height=600,
-        margin=dict(
-            pad=3
-        ),
-    )
-    fig.update_xaxes(
-        rangeslider_visible=True,
-        rangeselector=dict(
-            buttons=list([
-                dict(count=1, label="1m", step="month", stepmode="backward"),
-                dict(count=6, label="6m", step="month", stepmode="backward"),
-                dict(count=1, label="YTD", step="year", stepmode="todate"),
-                dict(count=1, label="1y", step="year", stepmode="backward"),
-                dict(step="all")
-            ])
-        )
-    )
-    st.plotly_chart(fig)
+    ###################
+    ###   Returns   ###
+    ###################
 
     st.header(f"Weekday wise PNL")
     cats = ['Monday', 'Tuesday', 'Wednesday',

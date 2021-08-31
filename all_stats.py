@@ -18,9 +18,10 @@ from single_stats import single_stats
 def all_stats(json_obj):
     min_date = datetime(2021, 6, 7)
     max_date = date.today()
+    month_start = datetime.now().replace(day=1)
 
     start_date = st.sidebar.date_input(
-        "select start date", value=min_date, min_value=min_date, max_value=max_date)
+        "select start date", value=month_start, min_value=min_date, max_value=max_date)
 
     to_date = st.sidebar.date_input(
         "select end date", value=max_date, min_value=start_date, max_value=max_date)
