@@ -4,6 +4,8 @@ import streamlit as st
 import hashlib
 import time
 
+from zmq.sugar.constants import NOBLOCK
+
 # Custom packages
 from all_stats import all_stats
 from today_stats import today_stats
@@ -32,8 +34,14 @@ else:
     socket = context.socket(zmq.REQ)
     socket.connect(f"tcp://{st.secrets['IP']}:{st.secrets['PORT']}")
     socket.send(pswd.encode())
-    message = socket.recv()
-    socket.close()
+    socket.RCVTIMEO = 1000
+    try:
+        message = socket.recv()
+        socket.close()
+    except Exception as e:
+        st.error(e)
+        st.error('ZMQ Server error! Check the server!')
+        st.stop()
 
     # load data.
     fetched_data = json.loads(message)
