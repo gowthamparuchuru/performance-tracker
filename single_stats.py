@@ -14,58 +14,58 @@ def single_stats(selected_strat, df):
     original = df.copy()
 
     # cumulative pnl
-    df['CumPNL'] = df['PNL'].cumsum()
+    df['cum_pnl'] = df['pnl'].cumsum()
     # drawdown
-    df['HighValue'] = df['CumPNL'].cummax()
-    df['Drawdown'] = df['CumPNL'] - df['HighValue']
+    df['high_value'] = df['cum_pnl'].cummax()
+    df['drawdown'] = df['cum_pnl'] - df['high_value']
     # roi
-    df['ROI'] = round((df['PNL']/df['Capital'])*100, 2)
+    df['roi'] = round((df['pnl']/df['capital'])*100, 2)
     # cumulative roi
-    df['CumROI'] = df['ROI'].cumsum()
+    df['cum_roi'] = df['roi'].cumsum()
     # drawdown roi
-    df['RoiHighValue'] = df['CumROI'].cummax()
-    df['RoiDrawdown'] = df['CumROI'] - df['RoiHighValue']
+    df['roi_high_value'] = df['cum_roi'].cummax()
+    df['roi_drawdown'] = df['cum_roi'] - df['roi_high_value']
 
     # weekday wise pnl
     df['tmp'] = df.index
     weekDays = ("Monday", "Tuesday", "Wednesday",
                 "Thursday", "Friday", "Saturday", "Sunday")
-    df['Week'] = df['tmp'].apply(
+    df['week'] = df['tmp'].apply(
         lambda x: weekDays[x.to_pydatetime().weekday()])
     week_groups = pd.DataFrame()
-    week_groups["PNL"] = df.groupby('Week', sort=True)['PNL'].sum()
-    week_groups["ROI"] = df.groupby('Week', sort=True)['ROI'].sum()
+    week_groups["pnl"] = df.groupby('week', sort=True)['pnl'].sum()
+    week_groups["roi"] = df.groupby('week', sort=True)['roi'].sum()
 
     # monthly pnl
-    df['Month'] = df['tmp'].apply(lambda x: x.strftime("%b, %Y"))
+    df['month'] = df['tmp'].apply(lambda x: x.strftime("%b, %Y"))
     month_groups = pd.DataFrame()
-    month_groups["PNL"] = df.groupby('Month', sort=False)['PNL'].sum()
-    month_groups["ROI"] = df.groupby('Month', sort=False)['ROI'].sum()
+    month_groups["pnl"] = df.groupby('month', sort=False)['pnl'].sum()
+    month_groups["roi"] = df.groupby('month', sort=False)['roi'].sum()
 
     # yearly pnl
-    df['Year'] = df['tmp'].apply(lambda x: x.strftime('%Y'))
+    df['year'] = df['tmp'].apply(lambda x: x.strftime('%Y'))
     year_groups = pd.DataFrame()
-    year_groups["PNL"] = df.groupby('Year', sort=False)['PNL'].sum()
-    year_groups["ROI"] = df.groupby('Year', sort=False)['ROI'].sum()
+    year_groups["pnl"] = df.groupby('year', sort=False)['pnl'].sum()
+    year_groups["roi"] = df.groupby('year', sort=False)['roi'].sum()
 
     # calculate all statistics of model.
     stats = {}
     stats["Start Date"] = datetime.strftime(df.index[0], "%d-%b-%Y")
     stats["Total Days"] = len(df)
-    stats["Winning Day"] = df[df['PNL'] >= 0]['PNL'].count()
-    stats["Losing Day"] = df[df['PNL'] < 0]['PNL'].count()
+    stats["Winning Day"] = df[df['pnl'] >= 0]['pnl'].count()
+    stats["Losing Day"] = df[df['pnl'] < 0]['pnl'].count()
     stats["Winning Accuracy %"] = f"{round((stats['Winning Day']/stats['Total Days'])*100, 2)} %"
-    stats["Max Profit"] = "{:.2f}".format(df["PNL"].max())
-    stats["Max Loss"] = "{:.2f}".format(df["PNL"].min())
-    stats["Max Drawdown"] = "{:.2f}".format(df["Drawdown"].min())
+    stats["Max Profit"] = "{:.2f}".format(df["pnl"].max())
+    stats["Max Loss"] = "{:.2f}".format(df["pnl"].min())
+    stats["Max Drawdown"] = "{:.2f}".format(df["drawdown"].min())
     stats["Avg Profit on Win Days"] = round(
-        df[df['PNL'] >= 0]['PNL'].mean(), 2)
-    stats["Avg Loss on Loss Days"] = round(df[df['PNL'] < 0]['PNL'].mean(), 2)
-    stats["Avg Profit Per day"] = round(df['PNL'].mean(), 2)
-    stats["Net profit"] = "{:.2f}".format(df['PNL'].sum())
-    stats["Net Returns %"] = f"{round(df['ROI'].sum(), 2)} %"
+        df[df['pnl'] >= 0]['pnl'].mean(), 2)
+    stats["Avg Loss on Loss Days"] = round(df[df['pnl'] < 0]['pnl'].mean(), 2)
+    stats["Avg Profit Per day"] = round(df['pnl'].mean(), 2)
+    stats["Net profit"] = "{:.2f}".format(df['pnl'].sum())
+    stats["Net Returns %"] = f"{round(df['roi'].sum(), 2)} %"
     stats["Sharpe Ratio"] = "{:.2f}".format(
-        (252 ** 0.5) * (df["PNL"].mean() / df["PNL"].std()))
+        (252 ** 0.5) * (df["pnl"].mean() / df["pnl"].std()))
     win_days_acc = (stats['Winning Day']/stats['Total Days'])*100
     loss_days_acc = 100 - win_days_acc
     risk_to_reward = stats["Avg Profit on Win Days"] / \
@@ -85,9 +85,9 @@ def single_stats(selected_strat, df):
     ####################
     st.header(f"Daily profit and loss")
     # ROI
-    colours = np.where(df["ROI"] < 0, 'crimson', 'SeaGreen')
+    colours = np.where(df["roi"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=df.index, y=df["ROI"], marker_color=colours))
+    fig.add_trace(go.Bar(x=df.index, y=df["roi"], marker_color=colours))
     fig.update_layout(
         title="Day wise ROI",
         xaxis_title="Date",
@@ -102,9 +102,9 @@ def single_stats(selected_strat, df):
 
     # Absolute
 
-    colours = np.where(df["PNL"] < 0, 'crimson', 'SeaGreen')
+    colours = np.where(df["pnl"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=df.index, y=df["PNL"], marker_color=colours))
+    fig.add_trace(go.Bar(x=df.index, y=df["pnl"], marker_color=colours))
     fig.update_layout(
         title="Day wise PNL",
         xaxis_title="Date",
@@ -119,8 +119,8 @@ def single_stats(selected_strat, df):
 
     # calendar heatmap
     # st.header(f"Calendar Heatmap")
-    # max_point = max(abs(min(df['PNL'])), max(df['PNL']))
-    # calplot.calplot(df["PNL"], cmap='PRGn', colorbar=True, linewidth=3, figsize=(
+    # max_point = max(abs(min(df['pnl'])), max(df['pnl']))
+    # calplot.calplot(df["pnl"], cmap='PRGn', colorbar=True, linewidth=3, figsize=(
     #     60, 6), edgecolor='grey', vmin=-max_point, vmax=max_point)
     # st.pyplot()
     # plt.clf()
@@ -131,7 +131,7 @@ def single_stats(selected_strat, df):
     # Percentage
     st.header(f"Returns plots")
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df.index, y=df['CumROI'],
+    fig.add_trace(go.Scatter(x=df.index, y=df['cum_roi'],
                   mode='lines+markers',
                   marker=dict(size=4),
                   marker_color='rgba(46, 139, 87, 1)', opacity=0.5,
@@ -162,7 +162,7 @@ def single_stats(selected_strat, df):
 
     # Absolute
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df.index, y=df['CumPNL'],
+    fig.add_trace(go.Scatter(x=df.index, y=df['cum_pnl'],
                   mode='lines+markers',
                   marker=dict(size=4),
                   marker_color='rgba(0,129,167,1)', opacity=0.5,
@@ -196,7 +196,7 @@ def single_stats(selected_strat, df):
     ###################
     # Percentage Drawdown
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df.index, y=df['RoiDrawdown'],
+    fig.add_trace(go.Scatter(x=df.index, y=df['roi_drawdown'],
                   mode='lines+markers',
                   marker=dict(size=4),
                   marker_color='rgba(229,107,111,1)', opacity=0.5,
@@ -231,7 +231,7 @@ def single_stats(selected_strat, df):
     # Absolute Drawdown
     st.header(f"Drawdown plot")
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df.index, y=df['Drawdown'],
+    fig.add_trace(go.Scatter(x=df.index, y=df['drawdown'],
                   mode='lines+markers',
                   marker=dict(size=4),
                   marker_color='rgba(229,107,111,1)', opacity=0.5,
@@ -272,10 +272,10 @@ def single_stats(selected_strat, df):
             'Thursday', 'Friday']
     week_groups = week_groups.loc[cats]
 
-    colours = np.where(week_groups["PNL"] < 0, 'crimson', 'SeaGreen')
+    colours = np.where(week_groups["pnl"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
     fig.add_trace(go.Bar(x=week_groups.index,
-                  y=week_groups["PNL"], marker_color=colours))
+                  y=week_groups["pnl"], marker_color=colours))
     fig.update_layout(
         title="Week Day wise Profit and Loss",
         xaxis_title="Day",
@@ -288,10 +288,10 @@ def single_stats(selected_strat, df):
     )
     st.plotly_chart(fig)
 
-    colours = np.where(week_groups["ROI"] < 0, 'crimson', 'SeaGreen')
+    colours = np.where(week_groups["roi"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
     fig.add_trace(go.Bar(x=week_groups.index,
-                  y=week_groups["ROI"], marker_color=colours))
+                  y=week_groups["roi"], marker_color=colours))
     fig.update_layout(
         title="Week Day wise ROI",
         xaxis_title="Day",
@@ -306,25 +306,25 @@ def single_stats(selected_strat, df):
 
     st.header(f"Monthly PNL")
     st.table(month_groups.iloc[::-1].style.format({
-        "PNL": '₹ {:20,.0f}',
-        "ROI": '{:.2f} %'
+        "pnl": '₹ {:20,.0f}',
+        "roi": '{:.2f} %'
     }))
 
     st.header(f"Yearly PNL")
     st.table(year_groups.iloc[::-1].style.format({
-        "PNL": '₹ {:20,.0f}',
-        "ROI": '{:.2f} %'
+        "pnl": '₹ {:20,.0f}',
+        "roi": '{:.2f} %'
     }))
 
     st.header(f"Date-wise PNL (Last 30 Days)")
-    original["Date"] = original.index
-    original["Date"] = original['Date'].apply(lambda x: x.strftime("%d-%b-%Y"))
-    original.set_index("Date", inplace=True)
-    original.drop(["Brokerage"], axis=1, inplace=True)
-    original['ROI'] = (original['PNL']/original['Capital']) * 100
-    st.table(original.iloc[::-1].head(30).style.format({
-        "Capital": '{:20,.0f}',
-        "Lot": '{:.0f}',
-        "PNL": "{:.0f}",
-        "ROI": '{:.2f} %',
+    original["date"] = original.index
+    original["date"] = original['date'].apply(lambda x: x.strftime("%d-%b-%Y"))
+    original.set_index("date", inplace=True)
+    original.drop(["brokerage"], axis=1, inplace=True)
+    original['roi'] = (original['pnl']/original['capital']) * 100
+    st.table(original.iloc[::-1].head(10).style.format({
+        "capital": '{:20,.0f}',
+        "lot": '{:.0f}',
+        "pnl": "{:.0f}",
+        "roi": '{:.2f} %',
     }))

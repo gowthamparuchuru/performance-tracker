@@ -51,23 +51,23 @@ def today_stats(json_obj):
     df = df.T
 
     # caluclate net and roi.
-    df.loc["Net"] = df.sum()
-    df["ROI"] = round(100 * df["PNL"]/df["Capital"], 2)
+    df.loc["net"] = df.sum()
+    df["roi"] = round(100 * df["pnl"]/df["capital"], 2)
 
     # print the dataframe.
-    st.header(f"Date: {datetime.strftime(select_date, '%d-%b-%Y (%a)')}")
-    st.table(df.style.format({'Capital': '₹ {:20,.0f}',
-                              'Lot': '{:.0f}',
-                              'Brokerage': '₹ {:20,.0f}',
-                              'ROI': '{:.2f} %',
-                              'PNL': '₹ {:20,.2f}'}))
+    st.header(f"date: {datetime.strftime(select_date, '%d-%b-%Y (%a)')}")
+    st.table(df.style.format({'capital': '₹ {:20,.0f}',
+                              'lot': '{:.0f}',
+                              'brokerage': '₹ {:20,.0f}',
+                              'roi': '{:.2f} %',
+                              'pnl': '₹ {:20,.2f}'}))
 
     # plot PnL chart.
     st.header(f"PNL plots")
 
-    colours = np.where(df["PNL"] < 0, 'crimson', 'SeaGreen')
+    colours = np.where(df["pnl"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=df.index, y=df["PNL"], marker_color=colours))
+    fig.add_trace(go.Bar(x=df.index, y=df["pnl"], marker_color=colours))
     fig.update_layout(
         title="Profit and Loss plot",
         xaxis_title="Strategy",
@@ -80,9 +80,9 @@ def today_stats(json_obj):
     st.plotly_chart(fig)
 
     # plot ROI chart for the day.
-    colours = np.where(df["ROI"] < 0, 'crimson', 'SeaGreen')
+    colours = np.where(df["roi"] < 0, 'crimson', 'SeaGreen')
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=df.index, y=df["ROI"], marker_color=colours))
+    fig.add_trace(go.Bar(x=df.index, y=df["roi"], marker_color=colours))
     fig.update_layout(
         title="ROI plot",
         xaxis_title="Strategy",

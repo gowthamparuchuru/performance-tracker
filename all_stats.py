@@ -36,25 +36,25 @@ def all_stats(json_obj):
 
     corr_df = df.copy()
 
-    df["Capital"] = 0
-    df["Lot"] = 0
-    df["Brokerage"] = 0
-    df["PNL"] = 0
+    df["capital"] = 0
+    df["lot"] = 0
+    df["brokerage"] = 0
+    df["pnl"] = 0
 
     for s_name, val_df in json_obj.items():
-        df["Capital"] = df["Capital"].add(val_df["Capital"], fill_value=0)
-        df["Lot"] = df["Lot"].add(val_df["Lot"], fill_value=0)
-        df["PNL"] = df["PNL"].add(val_df["PNL"], fill_value=0)
-        df["Brokerage"] = df["Brokerage"].add(
-            val_df["Brokerage"], fill_value=0)
+        df["capital"] = df["capital"].add(val_df["capital"], fill_value=0)
+        df["lot"] = df["lot"].add(val_df["lot"], fill_value=0)
+        df["pnl"] = df["pnl"].add(val_df["pnl"], fill_value=0)
+        df["brokerage"] = df["brokerage"].add(
+            val_df["brokerage"], fill_value=0)
 
-        corr_df[s_name] = val_df["PNL"]
+        corr_df[s_name] = val_df["pnl"]
 
     corr_df.fillna(0, inplace=True)
     corr_df = corr_df.loc[~(corr_df == 0).all(axis=1)]
 
     for datee in df.index:
-        if df.loc[datee]["Capital"] == 0:
+        if df.loc[datee]["capital"] == 0:
             df.drop(datee, inplace=True)
 
     single_stats("Portfolio", df)

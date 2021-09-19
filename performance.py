@@ -75,15 +75,20 @@ else:
         pass
     elif analysis_type == "Per lot":
         for v in json_obj.values():
-            v["Capital"] = round(v["Capital"]/v["Lot"], 2)
-            v["Brokerage"] = round(v["Brokerage"]/v["Lot"], 2)
-            v["PNL"] = round(v["PNL"]/v["Lot"], 2)
-            v["Lot"] = 1
+            v["capital"] = round(v["capital"]/v["lot"], 2)
+            v["brokerage"] = round(v["brokerage"]/v["lot"], 2)
+            v["unrealized_pnl"] = round(v["unrealized_pnl"]/v["lot"], 2)
+            v["lots"] = 1
 
     # process based on brokerage.
     if chosen == "Yes":
         for v in json_obj.values():
-            v["PNL"] = v["PNL"] - v["Brokerage"]
+            v["pnl"] = v["unrealized_pnl"] - v["brokerage"]
+            v.drop(["unrealized_pnl"], axis=1, inplace=True)
+    else:
+        for v in json_obj.values():
+            v["pnl"] = v["unrealized_pnl"]
+            v.drop(["unrealized_pnl"], axis=1, inplace=True)
 
     # render page based by selected option.
     if selected_strat == "Today":
